@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  # Service untuk Node.js
+  nodejs-app:
+    image: node:20
+    container_name: nodejs-app
+    working_dir: /usr/src/app
+    restart: on-failure
+    networks: 
+    - tugas_akhir
+    volumes:
+      - ./:/usr/src/app
+    ports:
+      - "${PORT}:${PORT}"
+    environment:
+      - PORT=${PORT}
+      - NODE_ENV=${NODE_ENV}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_DATABASE=${DB_DATABASE}
+    depends_on:
+      - mysql
+    command: bash -c "npm install && npm run db-migrate && npm run dev"
+
+  # Service untuk MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${DB_FORWARD_PORT}:3306"
+    networks: 
+      - tugas_akhir
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:
+    driver: local
+networks: 
+  tugas_akhir:
